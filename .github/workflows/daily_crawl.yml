@@ -2,9 +2,15 @@ name: Daily AI Crawler
 
 on:
   schedule:
-    # 每天 UTC 时间 00:00 (北京时间早上 8:00) 自动运行
-    - cron: '0 0 * * *'
-  workflow_dispatch: # 允许你手动点击按钮触发测试
+    # 🌟 设置为每小时自动抓取
+    # Cron 表达式: 分 时 日 月 周
+    # '0 * * * *' 代表每小时的第 0 分钟运行
+    - cron: '0 * * * *'
+  workflow_dispatch: # 允许你在 GitHub Actions 页面手动点击按钮运行
+  push:              # 每次推送代码到 main 分支时也会触发一次（用于测试）
+    branches:
+      - main
+      - master
 
 jobs:
   crawl:
@@ -25,7 +31,7 @@ jobs:
 
       - name: Run crawler
         env:
-          # 从 GitHub Secrets 读取密钥
+          # 从 GitHub Secrets 读取所有必要的密钥
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}

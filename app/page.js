@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js'; 
 import { 
-  Globe, Cpu, BookOpen, DollarSign, TrendingUp, Search, 
+  Globe, Cpu, BookOpen, DollarSign, Search, 
   Bell, ExternalLink, Bookmark, RefreshCw, Menu, X, 
-  Building2, ArrowUpRight, Sparkles, Zap, MessageSquareQuote,
-  Activity, Layers, Smartphone // 🌟 新增 Smartphone 图标
+  Building2, ArrowUpRight, Sparkles, MessageSquareQuote,
+  Activity, Layers, Smartphone
 } from 'lucide-react';
 
 // 初始化 Supabase 客户端
@@ -81,25 +81,23 @@ const AIIntelDashboard = () => {
       case 'news': return { label: 'NEWS', color: 'bg-blue-50 text-blue-600 border-blue-100' };
       case 'funding': return { label: 'VC', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' };
       case 'research': return { label: 'PAPER', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' };
-      case 'trend': return { label: 'TREND', color: 'bg-amber-50 text-amber-600 border-amber-100' };
+      // trend 已移除样式逻辑
       case 'opinion': return { label: 'VOICE', color: 'bg-cyan-50 text-cyan-600 border-cyan-100' };
-      // 🌟 新增两个类型的样式
       case 'hardware': return { label: 'HARDWARE', color: 'bg-rose-50 text-rose-600 border-rose-100' };
       case 'application': return { label: 'APP', color: 'bg-violet-50 text-violet-600 border-violet-100' };
       default: return { label: 'RAW', color: 'bg-slate-50 text-slate-500 border-slate-200' };
     }
   };
 
-  // 📝 更新：双语标题映射
+  // 📝 更新：双语标题映射 (已移除 Trending)
   const getTabTitle = (tab) => {
     const map = {
       'all': 'Mission Control 综合概览',
-      'news': 'Industry Intel 产业情报', // 保留映射以防万一，但侧边栏入口已移除
+      'news': 'Industry Intel 产业情报',
       'research': 'Lab Reports 前沿论文',
-      'trend': 'Market Signals 市场趋势',
       'opinion': 'Key Voices 领袖观点',
-      'hardware': 'Hardware Tech 硬件科技', // 🌟 新增标题
-      'application': 'App Watch 应用观察',   // 🌟 新增标题
+      'hardware': 'Hardware Tech 硬件科技',
+      'application': 'App Watch 应用观察',
       'saved': 'Archives 个人收藏'
     };
     return map[tab] || 'Intelligence 情报中心';
@@ -108,40 +106,42 @@ const AIIntelDashboard = () => {
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-600 selection:text-white overflow-hidden">
       
-      {/* Sidebar - Deep Blue Tech Theme */}
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-slate-900 to-blue-950 text-white z-50 transform transition-transform duration-500 ease-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Sidebar - 更新配色：更纯净的深空灰/黑，减少浑浊的深蓝色感 */}
+      <aside className={`fixed inset-y-0 left-0 w-72 bg-[#0B1121] text-white z-50 transform transition-transform duration-500 ease-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         {/* Logo Area */}
         <div className="p-8 flex items-center gap-4 mb-2">
-          <div className="relative w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-cyan-400 opacity-80"></div>
+          <div className="relative w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-blue-400/30 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-cyan-400 opacity-90"></div>
             <Sparkles size={20} className="text-white relative z-10" />
           </div>
           <div>
             <span className="font-bold text-xl tracking-tight block leading-none text-white">NorthAI</span>
-            <span className="text-[10px] font-mono text-blue-300 uppercase tracking-widest opacity-80">Intelligence 情报站</span>
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest opacity-80">Intelligence 情报站</span>
           </div>
         </div>
 
-        {/* Navigation - 📝 更新：双语菜单项 */}
+        {/* Navigation - 📝 更新顺序：Trends 已移除，Research 移至底部 */}
         <nav className="px-4 space-y-2 mt-6">
           <SidebarItem icon={<Activity size={18} />} label="Overview 综合" active={activeTab === 'all'} onClick={() => setActiveTab('all')} />
           
           <div className="px-4 py-4">
-            <div className="h-px bg-blue-800/50"></div>
+            <div className="h-px bg-slate-800/60"></div>
           </div>
           
-          {/* 🗑️ 已移除 Industry 产业 栏目 */}
+          {/* Industry 已被 Hardware 和 Apps 替代 */}
           
           <SidebarItem icon={<Cpu size={18} />} label="Hardware 硬件" active={activeTab === 'hardware'} onClick={() => setActiveTab('hardware')} />
           <SidebarItem icon={<Smartphone size={18} />} label="Apps 应用" active={activeTab === 'application'} onClick={() => setActiveTab('application')} />
-          
-          <SidebarItem icon={<Layers size={18} />} label="Research 学术" active={activeTab === 'research'} onClick={() => setActiveTab('research')} />
           <SidebarItem icon={<MessageSquareQuote size={18} />} label="Voices 观点" active={activeTab === 'opinion'} onClick={() => setActiveTab('opinion')} />
-          <SidebarItem icon={<Zap size={18} />} label="Trending 趋势" active={activeTab === 'trend'} onClick={() => setActiveTab('trend')} />
+          
+          {/* Research 移到底部 */}
+          <div className="pt-2">
+             <SidebarItem icon={<Layers size={18} />} label="Research 学术" active={activeTab === 'research'} onClick={() => setActiveTab('research')} />
+          </div>
           
           <div className="mt-10 px-4">
-            <h3 className="text-[10px] font-mono font-bold text-blue-300/50 uppercase tracking-widest mb-3">Personal 个人</h3>
+            <h3 className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest mb-3">Personal 个人</h3>
             <SidebarItem icon={<Bookmark size={18} />} label="Saved 收藏" active={activeTab === 'saved'} onClick={() => setActiveTab('saved')} count={savedIds.length} />
           </div>
         </nav>
