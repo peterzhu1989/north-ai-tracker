@@ -96,7 +96,7 @@ def save_to_supabase(data):
 
 # --- 抓取函数 ---
 def fetch_company_news():
-    print("\n🔄 [1/3] 抓取科技巨头动态...")
+    print("\n🔄 [1/4] 抓取科技巨头动态...")
     companies = ['OpenAI', 'Anthropic', 'NVIDIA', 'Google DeepMind']
     for company in companies:
         print(f"   🔎 搜索: {company}")
@@ -120,7 +120,7 @@ def fetch_company_news():
             print(f"      ❌ 失败: {e}")
 
 def fetch_arxiv_papers():
-    print("\n🔄 [2/3] 抓取 arXiv 论文...")
+    print("\n🔄 [2/4] 抓取 arXiv 论文...")
     feed_url = 'http://export.arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=3&sortBy=submittedDate&sortOrder=descending'
     feed = feedparser.parse(feed_url)
     for entry in feed.entries:
@@ -139,7 +139,7 @@ def fetch_arxiv_papers():
         save_to_supabase(data)
 
 def fetch_hacker_news_ai():
-    print("\n🔄 [3/3] 抓取 Hacker News...")
+    print("\n🔄 [3/4] 抓取 Hacker News...")
     try:
         ids = requests.get('https://hacker-news.firebaseio.com/v0/topstories.json', timeout=10).json()
     except: return
@@ -168,11 +168,49 @@ def fetch_hacker_news_ai():
                 if save_to_supabase(data): count += 1
         except: continue
 
+def fetch_influencer_opinions():
+    print("\n🔄 [4/4] 抓取 AI 达人观点...")
+    # 定义达人列表：你可以根据喜好修改这里
+    influencers = [
+        'Yann LeCun', 'Andrej Karpathy', 'Sam Altman', 'Andrew Ng', 
+        'Demis Hassabis', 'Ilya Sutskever', 'Geoffrey Hinton', 'Mustafa Suleyman'
+    ]
+    
+    for name in influencers:
+        print(f"   🔎 追踪: {name}")
+        # 搜索：名字 + AI (确保领域相关) + 过去2天
+        query = name.replace(' ', '+') + '+AI'
+        rss = f"https://news.google.com/rss/search?q={query}+when:2d&hl=en-US&gl=US&ceid=US:en"
+        
+        try:
+            feed = feedparser.parse(rss)
+            # 每人只取最新的一条，防止信息过载
+            for entry in feed.entries[:1]:
+                print(f"      🗣️  观点: {entry.title[:30]}...")
+                
+                # 特别提示 AI 这是一篇观点文章
+                prompt_content = f"Influencer: {name}. This is a news report about their recent opinion/tweet/video. Summary what they said."
+                title_cn, summary_cn = process_with_ai(entry.title, prompt_content)
+                
+                data = {
+                    "title": title_cn,
+                    "source": f"{name} Quotes", # 显示为人名引用
+                    "type": "opinion",          # 对应 'opinion' 类型
+                    "url": entry.link,
+                    "summary": summary_cn,
+                    "tags": [name, "Opinion", "AI Leader"],
+                    "relevance": 95
+                }
+                save_to_supabase(data)
+        except Exception as e:
+            print(f"      ❌ 失败: {e}")
+
 def run_all_tasks():
     print(f"\n⏰ [当前时间: {time.strftime('%H:%M:%S')}] 开始任务...")
     fetch_company_news()
     fetch_arxiv_papers()
     fetch_hacker_news_ai()
+    fetch_influencer_opinions() # 新增调用
     print("\n✅ 所有任务完成。")
 
 if __name__ == "__main__":
