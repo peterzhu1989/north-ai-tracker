@@ -29,7 +29,7 @@ llm_model = os.environ.get("LLM_MODEL", "gpt-3.5-turbo")
 # --- 检查 Supabase ---
 if not supabase_url or not supabase_key:
     print("❌ 错误: 未找到 Supabase 配置。")
-    exit(1) # 返回非0状态码，让 GitHub Actions 知道出错了
+    exit(1)
 
 # --- 检查 AI Key ---
 if not llm_api_key:
@@ -94,25 +94,80 @@ def save_to_supabase(data):
         print(f"   ❌ 入库失败: {e}")
         return False
 
-# --- 抓取函数 ---
-def fetch_company_news():
-    print("\n🔄 [1/4] 抓取科技巨头动态...")
-    companies = ['OpenAI', 'Anthropic', 'NVIDIA', 'Google DeepMind']
-    for company in companies:
-        print(f"   🔎 搜索: {company}")
-        query = company.replace(' ', '+')
-        rss = f"https://news.google.com/rss/search?q={query}+when:1d&hl=en-US&gl=US&ceid=US:en"
+# --- 🌟 新增功能：AI 硬件抓取 ---
+def fetch_ai_hardware():
+    print("\n🔄 [1/5] 抓取 AI 硬件动态 (芯片/机器人/供应链)...")
+    
+    # 定义搜索关键词：公司名 + 特定产品线以提高精准度
+    hardware_queries = [
+        'NVIDIA', 
+        'AMD AI', 
+        'Broadcom AI', # 博通
+        'Google TPU', # 谷歌芯片
+        'Tesla Optimus', # 特斯拉机器人
+        'TSMC AI', # 台积电 (核心供应商)
+        'ASML', # 光刻机 (核心供应商)
+        'SK Hynix HBM' # 内存 (核心供应商)
+    ]
+    
+    for query in hardware_queries:
+        print(f"   🔎 搜索: {query}")
+        search_term = query.replace(' ', '+')
+        # Google News RSS
+        rss = f"https://news.google.com/rss/search?q={search_term}+when:1d&hl=en-US&gl=US&ceid=US:en"
+        
+        try:
+            feed = feedparser.parse(rss)
+            # 取最新1条，避免刷屏
+            for entry in feed.entries[:1]:
+                # AI 处理
+                title_cn, summary_cn = process_with_ai(entry.title, f"Topic: AI Hardware {query}. {entry.title}")
+                
+                data = {
+                    "title": title_cn,
+                    "source": f"{query.split()[0]} News",
+                    "type": "hardware", # 对应前端的 Hardware 栏目
+                    "url": entry.link,
+                    "summary": summary_cn,
+                    "tags": [query.split()[0], "Hardware", "Chip"],
+                    "relevance": 95
+                }
+                save_to_supabase(data)
+        except Exception as e:
+            print(f"      ❌ 失败: {e}")
+
+# --- 🌟 新增功能：AI 应用抓取 ---
+def fetch_ai_apps():
+    print("\n🔄 [2/5] 抓取 AI 应用动态 (模型/软件/FSD)...")
+    
+    app_queries = [
+        'OpenAI', 
+        'Anthropic', 
+        'Google Gemini', # 谷歌应用
+        'xAI Grok', # 马斯克 xAI
+        'Microsoft Copilot', 
+        'Amazon Q', # 亚马逊 AI
+        'Meta Llama', # Meta
+        'Tesla FSD' # 特斯拉自动驾驶
+    ]
+    
+    for query in app_queries:
+        print(f"   🔎 搜索: {query}")
+        search_term = query.replace(' ', '+')
+        rss = f"https://news.google.com/rss/search?q={search_term}+when:1d&hl=en-US&gl=US&ceid=US:en"
+        
         try:
             feed = feedparser.parse(rss)
             for entry in feed.entries[:1]:
-                title_cn, summary_cn = process_with_ai(entry.title, f"Company: {company}. {entry.title}")
+                title_cn, summary_cn = process_with_ai(entry.title, f"Topic: AI Application {query}. {entry.title}")
+                
                 data = {
                     "title": title_cn,
-                    "source": f"{company} News",
-                    "type": "news",
+                    "source": f"{query.split()[0]} News",
+                    "type": "application", # 对应前端的 Apps 栏目
                     "url": entry.link,
                     "summary": summary_cn,
-                    "tags": [company, "Big Tech"],
+                    "tags": [query.split()[0], "App", "LLM"],
                     "relevance": 95
                 }
                 save_to_supabase(data)
@@ -120,7 +175,7 @@ def fetch_company_news():
             print(f"      ❌ 失败: {e}")
 
 def fetch_arxiv_papers():
-    print("\n🔄 [2/4] 抓取 arXiv 论文...")
+    print("\n🔄 [3/5] 抓取 arXiv 论文...")
     feed_url = 'http://export.arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=3&sortBy=submittedDate&sortOrder=descending'
     feed = feedparser.parse(feed_url)
     for entry in feed.entries:
@@ -139,12 +194,12 @@ def fetch_arxiv_papers():
         save_to_supabase(data)
 
 def fetch_hacker_news_ai():
-    print("\n🔄 [3/4] 抓取 Hacker News...")
+    print("\n🔄 [4/5] 抓取 Hacker News...")
     try:
         ids = requests.get('https://hacker-news.firebaseio.com/v0/topstories.json', timeout=10).json()
     except: return
 
-    keywords = ['AI', 'GPT', 'LLM', 'Claude', 'OpenAI', 'DeepMind']
+    keywords = ['AI', 'GPT', 'LLM', 'Claude', 'OpenAI', 'DeepMind', 'Transformer']
     count = 0
     for item_id in ids[:60]:
         if count >= 3: break
@@ -169,36 +224,24 @@ def fetch_hacker_news_ai():
         except: continue
 
 def fetch_influencer_opinions():
-    print("\n🔄 [4/4] 抓取 AI 达人观点...")
-    # 定义达人列表：你可以根据喜好修改这里
-    influencers = [
-        'Yann LeCun', 'Andrej Karpathy', 'Sam Altman', 'Andrew Ng', 
-        'Demis Hassabis', 'Ilya Sutskever', 'Geoffrey Hinton', 'Mustafa Suleyman'
-    ]
+    print("\n🔄 [5/5] 抓取 AI 达人观点...")
+    influencers = ['Yann LeCun', 'Andrej Karpathy', 'Sam Altman', 'Andrew Ng', 'Geoffrey Hinton']
     
     for name in influencers:
         print(f"   🔎 追踪: {name}")
-        # 搜索：名字 + AI (确保领域相关) + 过去2天
         query = name.replace(' ', '+') + '+AI'
         rss = f"https://news.google.com/rss/search?q={query}+when:2d&hl=en-US&gl=US&ceid=US:en"
-        
         try:
             feed = feedparser.parse(rss)
-            # 每人只取最新的一条，防止信息过载
             for entry in feed.entries[:1]:
-                print(f"      🗣️  观点: {entry.title[:30]}...")
-                
-                # 特别提示 AI 这是一篇观点文章
-                prompt_content = f"Influencer: {name}. This is a news report about their recent opinion/tweet/video. Summary what they said."
-                title_cn, summary_cn = process_with_ai(entry.title, prompt_content)
-                
+                title_cn, summary_cn = process_with_ai(entry.title, f"Influencer: {name}. Opinion/News.")
                 data = {
                     "title": title_cn,
-                    "source": f"{name} Quotes", # 显示为人名引用
-                    "type": "opinion",          # 对应 'opinion' 类型
+                    "source": f"{name} Quotes",
+                    "type": "opinion",
                     "url": entry.link,
                     "summary": summary_cn,
-                    "tags": [name, "Opinion", "AI Leader"],
+                    "tags": [name, "Opinion"],
                     "relevance": 95
                 }
                 save_to_supabase(data)
@@ -207,13 +250,13 @@ def fetch_influencer_opinions():
 
 def run_all_tasks():
     print(f"\n⏰ [当前时间: {time.strftime('%H:%M:%S')}] 开始任务...")
-    fetch_company_news()
+    # 执行所有新定义的任务
+    fetch_ai_hardware()
+    fetch_ai_apps()
     fetch_arxiv_papers()
     fetch_hacker_news_ai()
-    fetch_influencer_opinions() # 新增调用
+    fetch_influencer_opinions()
     print("\n✅ 所有任务完成。")
 
 if __name__ == "__main__":
-    # 🌟 关键修改：去掉了 while True 循环
-    # 脚本运行一次就会结束，非常适合 GitHub Actions
     run_all_tasks()

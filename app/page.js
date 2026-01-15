@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Globe, Cpu, BookOpen, DollarSign, TrendingUp, Search, 
   Bell, ExternalLink, Bookmark, RefreshCw, Menu, X, 
-  Building2, ArrowUpRight, Sparkles, Zap, MessageSquareQuote
+  Building2, ArrowUpRight, Sparkles, Zap, MessageSquareQuote,
+  Activity, Layers, Smartphone // 🌟 新增 Smartphone 图标
 } from 'lucide-react';
 
 // 初始化 Supabase 客户端
@@ -20,7 +21,7 @@ function timeAgo(dateString) {
   const now = new Date();
   const seconds = Math.floor((now - date) / 1000);
   
-  if (seconds < 60) return 'Just now';
+  if (seconds < 60) return 'Just now 刚刚';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
@@ -74,88 +75,109 @@ const AIIntelDashboard = () => {
     return matchesTab && matchesSearch;
   });
 
-  // Apple/Tesla 风格：极简黑白灰，仅用微小的颜色点缀
+  // Blue/White Tech Theme Badges
   const getTypeBadge = (type) => {
     switch(type) {
-      case 'news': return { label: 'NEWS', color: 'bg-zinc-100 text-zinc-600' };
-      case 'funding': return { label: 'VC', color: 'bg-emerald-50 text-emerald-600' }; // 资金用绿色
-      case 'research': return { label: 'PAPER', color: 'bg-zinc-100 text-zinc-600' };
-      case 'trend': return { label: 'TREND', color: 'bg-zinc-100 text-zinc-600' };
-      case 'opinion': return { label: 'VOICE', color: 'bg-indigo-50 text-indigo-600' }; // 观点用淡紫色
-      default: return { label: 'RAW', color: 'bg-zinc-50 text-zinc-400' };
+      case 'news': return { label: 'NEWS', color: 'bg-blue-50 text-blue-600 border-blue-100' };
+      case 'funding': return { label: 'VC', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' };
+      case 'research': return { label: 'PAPER', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' };
+      case 'trend': return { label: 'TREND', color: 'bg-amber-50 text-amber-600 border-amber-100' };
+      case 'opinion': return { label: 'VOICE', color: 'bg-cyan-50 text-cyan-600 border-cyan-100' };
+      // 🌟 新增两个类型的样式
+      case 'hardware': return { label: 'HARDWARE', color: 'bg-rose-50 text-rose-600 border-rose-100' };
+      case 'application': return { label: 'APP', color: 'bg-violet-50 text-violet-600 border-violet-100' };
+      default: return { label: 'RAW', color: 'bg-slate-50 text-slate-500 border-slate-200' };
     }
   };
 
+  // 📝 更新：双语标题映射
   const getTabTitle = (tab) => {
     const map = {
-      'all': 'Overview',
-      'news': 'Industry News',
-      'research': 'Research Papers',
-      'trend': 'Trending Now',
-      'opinion': 'Key Voices',
-      'saved': 'Library'
+      'all': 'Mission Control 综合概览',
+      'news': 'Industry Intel 产业情报', // 保留映射以防万一，但侧边栏入口已移除
+      'research': 'Lab Reports 前沿论文',
+      'trend': 'Market Signals 市场趋势',
+      'opinion': 'Key Voices 领袖观点',
+      'hardware': 'Hardware Tech 硬件科技', // 🌟 新增标题
+      'application': 'App Watch 应用观察',   // 🌟 新增标题
+      'saved': 'Archives 个人收藏'
     };
-    return map[tab] || 'Intelligence';
+    return map[tab] || 'Intelligence 情报中心';
   };
 
   return (
-    <div className="flex h-screen bg-[#F5F5F7] text-zinc-900 font-sans selection:bg-zinc-900 selection:text-white overflow-hidden">
+    <div className="flex h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-600 selection:text-white overflow-hidden">
       
-      {/* Sidebar - Dark Mode for contrast */}
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-[#000000] text-white/90 z-50 transform transition-transform duration-500 ease-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-8 flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center">
-            <Sparkles size={18} fill="black" />
+      {/* Sidebar - Deep Blue Tech Theme */}
+      <aside className={`fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-slate-900 to-blue-950 text-white z-50 transform transition-transform duration-500 ease-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        
+        {/* Logo Area */}
+        <div className="p-8 flex items-center gap-4 mb-2">
+          <div className="relative w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-cyan-400 opacity-80"></div>
+            <Sparkles size={20} className="text-white relative z-10" />
           </div>
-          <span className="font-semibold text-lg tracking-tight">NorthAI</span>
+          <div>
+            <span className="font-bold text-xl tracking-tight block leading-none text-white">NorthAI</span>
+            <span className="text-[10px] font-mono text-blue-300 uppercase tracking-widest opacity-80">Intelligence 情报站</span>
+          </div>
         </div>
 
-        <nav className="px-4 space-y-1">
-          <SidebarItem icon={<Globe size={18} />} label="Overview" active={activeTab === 'all'} onClick={() => setActiveTab('all')} />
-          <div className="h-px bg-white/10 my-4 mx-4"></div>
-          <SidebarItem icon={<Building2 size={18} />} label="Industry" active={activeTab === 'news'} onClick={() => setActiveTab('news')} />
-          <SidebarItem icon={<BookOpen size={18} />} label="Research" active={activeTab === 'research'} onClick={() => setActiveTab('research')} />
-          <SidebarItem icon={<MessageSquareQuote size={18} />} label="Voices" active={activeTab === 'opinion'} onClick={() => setActiveTab('opinion')} />
-          <SidebarItem icon={<Zap size={18} />} label="Trending" active={activeTab === 'trend'} onClick={() => setActiveTab('trend')} />
+        {/* Navigation - 📝 更新：双语菜单项 */}
+        <nav className="px-4 space-y-2 mt-6">
+          <SidebarItem icon={<Activity size={18} />} label="Overview 综合" active={activeTab === 'all'} onClick={() => setActiveTab('all')} />
           
-          <div className="mt-8">
-            <h3 className="px-4 text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Library</h3>
-            <SidebarItem icon={<Bookmark size={18} />} label="Saved" active={activeTab === 'saved'} onClick={() => setActiveTab('saved')} count={savedIds.length} />
+          <div className="px-4 py-4">
+            <div className="h-px bg-blue-800/50"></div>
+          </div>
+          
+          {/* 🗑️ 已移除 Industry 产业 栏目 */}
+          
+          <SidebarItem icon={<Cpu size={18} />} label="Hardware 硬件" active={activeTab === 'hardware'} onClick={() => setActiveTab('hardware')} />
+          <SidebarItem icon={<Smartphone size={18} />} label="Apps 应用" active={activeTab === 'application'} onClick={() => setActiveTab('application')} />
+          
+          <SidebarItem icon={<Layers size={18} />} label="Research 学术" active={activeTab === 'research'} onClick={() => setActiveTab('research')} />
+          <SidebarItem icon={<MessageSquareQuote size={18} />} label="Voices 观点" active={activeTab === 'opinion'} onClick={() => setActiveTab('opinion')} />
+          <SidebarItem icon={<Zap size={18} />} label="Trending 趋势" active={activeTab === 'trend'} onClick={() => setActiveTab('trend')} />
+          
+          <div className="mt-10 px-4">
+            <h3 className="text-[10px] font-mono font-bold text-blue-300/50 uppercase tracking-widest mb-3">Personal 个人</h3>
+            <SidebarItem icon={<Bookmark size={18} />} label="Saved 收藏" active={activeTab === 'saved'} onClick={() => setActiveTab('saved')} count={savedIds.length} />
           </div>
         </nav>
 
-        {/* 关闭按钮 (Mobile only) */}
+        {/* Close Button (Mobile) */}
         <button onClick={() => setIsSidebarOpen(false)} className="absolute top-6 right-6 md:hidden text-white/60 hover:text-white">
           <X size={24} />
         </button>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+      <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
         
-        {/* Header: Frosted Glass */}
-        <header className="h-20 flex items-center justify-between px-6 md:px-10 z-20 shrink-0 bg-[#F5F5F7]/80 backdrop-blur-xl sticky top-0">
+        {/* Header: Clean White with Tech Accents */}
+        <header className="h-20 flex items-center justify-between px-6 md:px-10 z-20 shrink-0 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0">
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 -ml-2 text-zinc-500 hover:bg-white hover:text-black rounded-full transition-colors">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
               <Menu size={24} />
             </button>
-            <h1 className="text-2xl font-semibold tracking-tight text-black hidden md:block">{getTabTitle(activeTab)}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 hidden md:block font-sans">{getTabTitle(activeTab)}</h1>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4 transition-colors group-focus-within:text-black" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 transition-colors group-focus-within:text-blue-600" />
               <input 
                 type="text" 
-                placeholder="Search..." 
-                className="w-48 md:w-64 bg-white/50 border border-transparent focus:bg-white focus:border-zinc-200 focus:shadow-sm rounded-xl py-2 pl-9 pr-4 text-sm transition-all outline-none placeholder:text-zinc-400"
+                placeholder="Search intel 搜索情报..." 
+                className="w-48 md:w-72 bg-slate-100 border border-transparent focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-500/10 rounded-xl py-2.5 pl-10 pr-4 text-sm transition-all outline-none placeholder:text-slate-400 font-medium"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <button 
               onClick={() => fetchNews()}
-              className={`p-2.5 text-zinc-500 hover:bg-white hover:text-black hover:shadow-sm rounded-full transition-all ${loading ? 'animate-spin' : ''}`}
+              className={`p-2.5 text-slate-500 hover:bg-white hover:text-blue-600 hover:shadow-sm rounded-full transition-all border border-transparent hover:border-slate-100 ${loading ? 'animate-spin text-blue-600' : ''}`}
             >
               <RefreshCw size={18} />
             </button>
@@ -163,100 +185,107 @@ const AIIntelDashboard = () => {
         </header>
 
         {/* Content Feed */}
-        <main className="flex-1 overflow-y-auto px-6 md:px-10 pb-10 scroll-smooth">
-          <div className="max-w-5xl mx-auto pt-4">
+        <main className="flex-1 overflow-y-auto px-4 md:px-10 pb-10 scroll-smooth">
+          <div className="max-w-5xl mx-auto pt-8">
             
-            <div className="flex items-baseline justify-between mb-8">
-              <span className="text-sm font-medium text-zinc-400">{filteredData.length} Signal{filteredData.length !== 1 ? 's' : ''}</span>
+            <div className="flex items-center justify-between mb-8 px-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                <span className="text-xs font-mono font-medium text-slate-500 uppercase tracking-wider">Live Feed 实时</span>
+              </div>
+              <span className="text-xs font-medium text-slate-400 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-sm">
+                {filteredData.length} Updates
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-5">
               {loading && newsItems.length === 0 ? (
                 [1, 2, 3].map(i => (
-                  <div key={i} className="bg-white rounded-3xl p-8 h-48 animate-pulse"></div>
+                  <div key={i} className="bg-white rounded-2xl p-8 h-48 animate-pulse border border-slate-100"></div>
                 ))
               ) : filteredData.length > 0 ? (
                 filteredData.map((item) => {
                   const badge = getTypeBadge(item.type);
                   return (
-                    <div key={item.id} className="group bg-white rounded-[2rem] p-6 md:p-8 transition-all duration-300 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] border border-transparent hover:border-zinc-100 relative overflow-hidden">
+                    <div key={item.id} className="group bg-white rounded-2xl p-6 md:p-8 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 hover:border-blue-200 relative overflow-hidden">
                       
-                      {/* 顶部元数据 */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <span className={`text-[10px] font-bold tracking-widest px-2 py-1 rounded-md ${badge.color}`}>
-                            {badge.label}
-                          </span>
-                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide flex items-center gap-1">
-                            {item.source}
-                          </span>
-                        </div>
-                        <span className="text-xs font-medium text-zinc-300 group-hover:text-zinc-400 transition-colors">
-                          {timeAgo(item.created_at)}
-                        </span>
-                      </div>
+                      {/* Tech Accent Line (Left) */}
+                      <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                      {/* 内容主体 */}
-                      <div className="max-w-3xl">
-                        <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 mb-3 leading-tight tracking-tight group-hover:text-black">
-                          {item.title}
-                        </h3>
-                        <p className="text-zinc-500 text-sm md:text-base leading-relaxed mb-6 font-light line-clamp-3">
-                          {item.summary}
-                        </p>
-                      </div>
-
-                      {/* 底部交互区 */}
-                      <div className="flex items-center gap-4 pt-2">
-                        {/* 标签 */}
-                        <div className="flex gap-2 overflow-x-auto no-scrollbar flex-1">
-                           {item.tags && item.tags.map((tag, idx) => (
-                            <span key={idx} className="text-[10px] font-medium text-zinc-400 bg-zinc-50 px-2 py-1 rounded-md border border-zinc-100">
-                              {tag}
+                      <div className="flex flex-col md:flex-row md:items-start gap-5">
+                        <div className="flex-1">
+                          {/* Metadata Row */}
+                          <div className="flex items-center flex-wrap gap-3 mb-3">
+                            <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded border ${badge.color}`}>
+                              {badge.label}
                             </span>
-                          ))}
-                        </div>
+                            <span className="text-xs font-mono text-slate-400 uppercase tracking-wide flex items-center gap-1">
+                              {item.source}
+                            </span>
+                            <span className="text-xs font-mono text-slate-300 group-hover:text-blue-500 transition-colors ml-auto md:ml-0 flex items-center gap-1">
+                              {timeAgo(item.created_at)}
+                            </span>
+                          </div>
 
-                        {/* 动作按钮 - Apple Style Buttons */}
-                        <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
-                          <button 
-                            onClick={() => toggleSave(item.id)}
-                            className="p-2 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-black transition-colors"
-                          >
-                            <Bookmark size={20} fill={savedIds.includes(item.id) ? "currentColor" : "none"} />
-                          </button>
-                          
-                          <a 
-                            href={item.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-black text-white text-xs font-semibold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200"
-                          >
-                            Read
-                            <ArrowUpRight size={14} />
-                          </a>
+                          {/* Title & Summary */}
+                          <h3 className="text-lg md:text-xl font-bold text-slate-900 mb-3 leading-snug group-hover:text-blue-900 transition-colors">
+                            {item.title}
+                          </h3>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-5 line-clamp-3 font-normal">
+                            {item.summary}
+                          </p>
+
+                          {/* Tags & Actions */}
+                          <div className="flex items-center justify-between pt-2">
+                            <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-[60%]">
+                               {item.tags && item.tags.map((tag, idx) => (
+                                <span key={idx} className="text-[10px] font-mono text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100 hover:border-blue-200 transition-colors whitespace-nowrap">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <button 
+                                onClick={() => toggleSave(item.id)}
+                                className={`p-2 rounded-full transition-colors ${savedIds.includes(item.id) ? 'text-blue-600 bg-blue-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                              >
+                                <Bookmark size={18} fill={savedIds.includes(item.id) ? "currentColor" : "none"} />
+                              </button>
+                              
+                              <a 
+                                href={item.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-blue-600 transition-all shadow-md hover:shadow-blue-200 group-hover:translate-x-1 duration-300"
+                              >
+                                Read
+                                <ArrowUpRight size={14} />
+                              </a>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   );
                 })
               ) : (
-                <div className="flex flex-col items-center justify-center py-32 text-zinc-400">
-                  <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-                    <Search size={24} className="opacity-20" />
+                <div className="flex flex-col items-center justify-center py-32 text-slate-400">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 border border-slate-200">
+                    <Search size={24} className="opacity-40" />
                   </div>
-                  <p className="font-light">No signals found.</p>
+                  <p className="font-mono text-sm">NO_DATA_FOUND</p>
                   {activeTab !== 'all' && (
-                    <button onClick={() => setActiveTab('all')} className="mt-4 text-xs font-medium text-black underline">
-                      Clear filters
+                    <button onClick={() => setActiveTab('all')} className="mt-4 text-xs font-bold text-blue-600 hover:underline uppercase tracking-wide">
+                      Reset Filters
                     </button>
                   )}
                 </div>
               )}
             </div>
             
-            <div className="mt-16 text-center pb-8">
-               <p className="text-[10px] font-medium text-zinc-300 tracking-widest uppercase">Designed by NorthAI</p>
+            <div className="mt-16 text-center pb-8 border-t border-slate-200/50 pt-8">
+               <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">System Status: Online • NorthAI v1.0</p>
             </div>
             
           </div>
@@ -266,25 +295,25 @@ const AIIntelDashboard = () => {
   );
 };
 
-// Tesla/Apple Style Sidebar Item
+// Tech Style Sidebar Item
 const SidebarItem = ({ icon, label, active, onClick, count }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group relative overflow-hidden ${
+    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden ${
       active 
-        ? 'bg-white text-black shadow-lg shadow-white/10' 
-        : 'text-white/60 hover:bg-white/10 hover:text-white'
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' 
+        : 'text-slate-400 hover:bg-white/5 hover:text-white'
     }`}
   >
     <div className="flex items-center gap-3 z-10">
-      <span className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+      <span className={`transition-colors ${active ? 'text-white' : 'group-hover:text-blue-300'}`}>
         {icon}
       </span>
-      <span>{label}</span>
+      <span className="tracking-wide">{label}</span>
     </div>
     {count !== undefined && count > 0 && (
-      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full z-10 ${
-        active ? 'bg-black text-white' : 'bg-white/20 text-white'
+      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md z-10 ${
+        active ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
       }`}>
         {count}
       </span>
